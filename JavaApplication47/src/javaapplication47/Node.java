@@ -22,7 +22,8 @@ import java.util.*;
 public class Node {
 
     public int baris = 16;
-    public int kolom = 3;
+    public int kolom = 4;
+    double[][] original = new double[baris][kolom];
     double[][] data = new double[baris][kolom];
     double[][] ortu = new double[baris][baris];
     double[][] ortu1 = new double[baris][kolom];
@@ -30,43 +31,46 @@ public class Node {
     double[][] anak1 = new double[baris][kolom];
     double[][] anak2 = new double[baris][kolom];
     double[] temp = new double[baris];
-    int maxPopulasi = 99;
+    int maxPopulasi = 100;
     int[] tempp = new int[baris];
     int ii;
     int jj = 0;
-    int [][] populasi = new int [maxPopulasi][baris];
+    int[][] populasi = new int[maxPopulasi][baris];
+    int[][] temppopulasi = new int[maxPopulasi][baris];
+    double[][] tempfitness = new double[maxPopulasi][1];
+    double max;
+    Random rankom = new Random();
     //ArrayList<Integer> Pop = new ArrayList<Integer>(99);
+    HashMap<Integer[], Double> BFK = new HashMap<Integer[], Double>();
     ArrayList<ArrayList<Integer>> Pop = new ArrayList<ArrayList<Integer>>();
-    
-    
-    
-    public void setPopulasi(){
-        int[] temp2 = new int [baris];
-        for(int i=0;i<maxPopulasi;i++){
-            temp2=randompermutation();
-           for(int j=0;j<baris;j++){
-               
-               populasi[i][j]=temp2[j];
-              // Pop.add(temp2);
-           }
-           
+
+    public void setPopulasi() {
+        //membuat populasi dari kumpulan kromosom
+        int[] temp2 = new int[baris];
+        for (int i = 0; i < maxPopulasi; i++) {
+            temp2 = randompermutation();
+            for (int j = 0; j < baris; j++) {
+
+                populasi[i][j] = temp2[j];
+                //RP();
+                // Pop.add(temp2);
+            }
+
         }
-        
-        System.out.println(" isi temp ");
-        for(int i=0;i<baris;i++){
-            System.out.println("temp "+temp[i]);
-        }
-        }
-    
-    public void showPopulasi(){
-        for(int i=0;i<99;i++){
-            for(int j=0;j<baris;j++){
-                System.out.println("populasi " +i+" = "+populasi[i][j] +"");
+
+    }
+
+    public void showPopulasi() {
+        for (int i = 0; i < maxPopulasi; i++) {
+            for (int j = 0; j < baris; j++) {
+                System.out.println("populasi " + i + " = " + populasi[i][j] + "");
             }
         }
+        System.out.println("");
     }
-    
+
     public void setData(String input) {
+        //input dari data excel
         try {
             Workbook w = Workbook.getWorkbook(new File(input));
 
@@ -75,11 +79,11 @@ public class Node {
                 for (int j = 0; j < kolom; j++) {
                     Cell c = s.getCell(j, i);
                     String isi = c.getContents();
-                    data[i][j] = Double.parseDouble(isi);
+                    original[i][j] = Double.parseDouble(isi);
 
                 }
             }
-
+            data=original;
         } catch (IOException ex) {
             Logger.getLogger(Node.class.getName()).log(Level.SEVERE, null, ex);
         } catch (BiffException ex) {
@@ -87,17 +91,17 @@ public class Node {
         }
     }
 
-
-    
     public void showData(double[][] data) {
+        //show data kromosom
         for (int i = 0; i < baris; i++) {
-             System.out.println(data[i][0] +"; "+data[i][1]+"; "+data[i][2]);
-            
+            System.out.println(data[i][0] + "; " + data[i][1] + "; " + data[i][2]);
+
         }
 
     }
 
     public void EucDistance() {
+        //udah gk dipake gk guna
         double deltaX = (data[0][1] - data[1][1]);
         double Xsqr = Math.pow(deltaX, 2);
         double deltaY = (data[0][2] - data[1][2]);
@@ -111,29 +115,8 @@ public class Node {
         System.out.println("hasil : " + hasil);
     }
 
-//    public void cobaEuc() {
-//        double deltaX, deltaY, hasil = 0;
-//        for (int i = 0; i < baris; i++) {
-//            for (int j = i + 1; j < baris; j++) {
-//                System.out.println(" x ke : " + i + " : " + data[i][1]);
-//                System.out.println(" x ke : " + j + " : " + data[j][1]);
-//                System.out.println(" y ke : " + i + " : " + data[i][2]);
-//                System.out.println(" y ke : " + j + " : " + data[j][2]);
-//                deltaX = Math.pow(data[i][1] - data[j][1], 2);
-//                System.out.println("delta X kuadrat : " + deltaX);
-//                deltaY = Math.pow(data[i][2] - data[j][2], 2);
-//                System.out.println("delta Y kuadrat : " + deltaY);
-//                hasil = Math.sqrt(deltaX + deltaY);
-//                System.out.println(" hasil euclidian : " + hasil);
-//
-//            }
-//        }
-//    }
-
-    
-    public  int[] randompermutation() {
-
-        
+    public int[] randompermutation() {
+        //membuat angka random dari kota 
         //id kota dipindah ke temp
         for (int i = 0; i < baris; i++) {
 
@@ -147,7 +130,7 @@ public class Node {
             temp[w] = temp[i];
             temp[i] = temp2;
         }
-        
+
         //konversi temp double ke tempp integer
         for (ii = 0; ii < temp.length; ii++) {
 
@@ -155,7 +138,6 @@ public class Node {
 
         }
         return tempp;
-       
 
     }
 
@@ -176,24 +158,95 @@ public class Node {
         }
         System.out.println("fitness " + fitness);
         System.out.println("total tour " + hasil);
+
         return fitness;
     }
 
+    public void ShowFitnessKromosom() {
+        for (int i = 0; i < maxPopulasi; i++) {
+            //System.out.println(" fitness kromosom ke " + i + " = " + tempfitness[i][0]);
+        }
+    }
+
+    public void maxFitnessPopulasi() {
+        max = tempfitness[0][0];
+        int idx = 0;
+        for (int i = 0; i < maxPopulasi; i++) {
+
+            if (tempfitness[i][0] > max) {
+                max = tempfitness[i][0];
+                idx = i;
+
+            }
+        }
+        System.out.println(" max fitness adalah " + max + " ada di kromosom ke " + idx);
+        System.out.println(" tour "+1/max);
+        System.out.println(" isi kromosom ");
+        for(int i=0;i<baris;i++){
+            System.out.println(populasi[idx][i]);
+        }
+        
+        for(int i=0;i<baris;i++){
+            temppopulasi[0][i]=populasi[idx][i];
+        }
+        
+    }
+    
+    public double[][] RP2() {
+        //untuk mengambil nilai urut dari populasi
+        double[][] eud = new double[baris][kolom];
+        double[][] eud2 = new double[baris][kolom];
+        double deltaX;
+        double deltaY;
+        double hasil = 0;
+        double fitness = 0;
+        double fit = 0;
+        
+        //System.out.println(" orang tua RP 2 ");
+
+        //int ran = rankom.nextInt(99 - 2) + 1;
+        //System.out.println(" random populasi ke " + ran);
+        for (int j = 0; j < maxPopulasi; j++) {
+            for (int i = 0; i < baris; i++) {
+                //int xx = tempp[i];
+                int xx = populasi[j][i];
+                xx = xx - 1;
+                //System.out.println(" hasil populasi "+ populasi[j][i]);
+                eud[i][0] = original[xx][0];
+                eud[i][1] = original[xx][1];
+                eud[i][2] = original[xx][2];
+                //System.out.println(data[xx][0] + " ; x = " + data[xx][1] + " ; y = " + data[xx][2]);
+
+                // menghitung euclidian distance 
+            }
+            data = eud;
+            fitness = Fitness(data);
+            tempfitness[j][0] = fitness;
+        }
+        //fit = Fitness(data);
+        //System.out.println(" fitness kromosom" +fit);
+//        if(tempfitness[ran][0] == 0){
+//            tempfitness[ran][1] = fit;
+//        }
+        return data;
+    }
+
     public double[][] RP() {
+        //hasil random permutasi di masukan ke dalam kromosom aka data[][]
         double[][] eud = new double[baris][kolom];
         double deltaX;
         double deltaY;
         double hasil = 0;
         double fitness = 0;
-        
-        
+        double fit = 0;
+
         System.out.println(" orang tua ");
-        Random r = new Random();
-        int ran = r.nextInt(99-1)+2;
-        System.out.println(" random populasi ke "+ran);
+
+        int ran = rankom.nextInt(99 - 2) + 1;
+        System.out.println(" random populasi ke " + ran);
         for (int i = 0; i < baris; i++) {
             //int xx = tempp[i];
-            int xx=populasi[ran][i];
+            int xx = populasi[ran][i];
             xx = xx - 1;
 
             eud[i][0] = data[xx][0];
@@ -204,37 +257,17 @@ public class Node {
             // menghitung euclidian distance 
         }
         data = eud;
-
-//        for (int i = 0; i < baris; i++) {
-//            if (i > 0) {
-//                deltaX = Math.pow(data[i][1] - data[i - 1][1], 2);
-//                deltaY = Math.pow(data[i][2] - data[i - 1][2], 2);
-//
-//                hasil = hasil + Math.sqrt(deltaX + deltaY);
-//
-//                fitness = 1 / (hasil + fitness);
-//            }
-//        }
-        
         Fitness(data);
-        System.out.println("");
         return data;
 
     }
 
     public void ambilortu() {
-       // randompermutation();
+        // randompermutation();
         ortu1 = RP();
-       // randompermutation();
+        // randompermutation();
         ortu2 = RP();
 
-//           for(int i=0;i<baris;i++){
-//               System.out.println("ortu 1 "+ortu1[i][0]);
-//           }
-//           System.out.println("");
-//           for(int i=0;i<baris;i++){
-//               System.out.println("ortu 2 "+ortu2[i][0]);
-//           }
         //xover(ortu1, ortu2);
     }
 
@@ -247,7 +280,7 @@ public class Node {
 
         ortu1 = data1;
         ortu2 = data2;
-        int ran = r.nextInt(baris) + 1;
+        int ran = r.nextInt(baris - 1) + 1;
         //int ran = 8;
         //int ran2 = r.nextInt(baris - 1) + 1;       
         System.out.println(" hasil random 1 = " + ran);
@@ -269,8 +302,8 @@ public class Node {
             System.out.println(" ortu 1 , anak 2 " + i + " " + anak2[i][0]);
         }
         System.out.println(" ");
-        //pengisian sisa kromosom anak1
 
+        //pengisian sisa kromosom anak1
         double[][] tempanak = new double[baris][kolom];
         double[][] tempanak2 = new double[baris][kolom];
         for (int o = 0; o < baris; o++) {
@@ -338,67 +371,85 @@ public class Node {
 
         }
         double fit;
-        fit=Fitness(anak2);
+        fit = Fitness(anak2);
         System.out.println("");
-        
 
     }
 
-    public void mutasi(double[][] anak1 , double [][] anak2){
+    public void mutasi(double[][] anak1, double[][] anak2) {
         Random rand = new Random();
-        int ran1 = rand.nextInt(baris - 1) + 1;  
-        int ran2 = rand.nextInt(baris - 1) + 1; 
+        int ran1 = rand.nextInt(baris - 1) + 1;
+        int ran2 = rand.nextInt(baris - 1) + 1;
         int ran3 = rand.nextInt(baris - 1) + 1;
         int ran4 = rand.nextInt(baris - 1) + 1;
-        double [][] temp = new double[baris][kolom];
+        double[][] temp = new double[baris][kolom];
         //anak1 mutasi
-        
+
         {
-            System.out.println("random 1 "+ran1);
-            System.out.println("random 2 "+ran2);
+            System.out.println("random 1 " + ran1);
+            System.out.println("random 2 " + ran2);
             temp[ran1][0] = anak1[ran1][0];
             temp[ran1][1] = anak1[ran1][1];
             temp[ran1][2] = anak1[ran1][2];
-            anak1[ran1][0]=anak1[ran2][0];
-            anak1[ran1][1]=anak1[ran2][1];
-            anak1[ran1][2]=anak1[ran2][2];
-            anak1[ran2][0]=temp[ran1][0];
-            anak1[ran2][1]=temp[ran1][1];
-            anak1[ran2][2]=temp[ran1][2];
+            anak1[ran1][0] = anak1[ran2][0];
+            anak1[ran1][1] = anak1[ran2][1];
+            anak1[ran1][2] = anak1[ran2][2];
+            anak1[ran2][0] = temp[ran1][0];
+            anak1[ran2][1] = temp[ran1][1];
+            anak1[ran2][2] = temp[ran1][2];
         }
-        
+
         //anak 2 mutasi
         {
             temp[ran3][0] = anak2[ran3][0];
             temp[ran3][1] = anak2[ran3][1];
             temp[ran3][2] = anak2[ran3][2];
-            anak2[ran3][0]=anak2[ran4][0];
-            anak2[ran3][1]=anak2[ran4][1];
-            anak2[ran3][2]=anak2[ran4][2];
-            anak2[ran4][0]=temp[ran3][0];
-            anak2[ran4][1]=temp[ran3][1];
-            anak2[ran4][2]=temp[ran3][2];
+            anak2[ran3][0] = anak2[ran4][0];
+            anak2[ran3][1] = anak2[ran4][1];
+            anak2[ran3][2] = anak2[ran4][2];
+            anak2[ran4][0] = temp[ran3][0];
+            anak2[ran4][1] = temp[ran3][1];
+            anak2[ran4][2] = temp[ran3][2];
         }
-        
+
         System.out.println(" mutasi anak ");
         showData(anak1);
         Fitness(anak1);
         showData(anak2);
         Fitness(anak2);
     }
+
+    public void pindah(int i){
+        
+        for(int k=i;k<maxPopulasi;k++){
+            for(int j=0;j<baris;j++){
+                temppopulasi[k][j]=(int)anak1[j][0];
+            }
+            for(int j=0;j<baris;j++){
+                temppopulasi[k+1][j]=(int)anak2[j][0];
+            }
+            
+        }
+    }
     
     public void start() {
-        int populasi = kolom;
+        //generasi
+        int generasi = 20;
+        for (int j = 0; j < generasi; j++) {
+            setPopulasi();
+            //showPopulasi();
+            for (int i = 0; i < maxPopulasi; i++) {
+                 RP();
+                Fitness(data);
+                ambilortu();
+                xover(ortu1, ortu2);
+                mutasi(anak1, anak2);
+                RP2();
+                maxFitnessPopulasi();
+                pindah(i);
+            }
+            System.out.println(" kromosom generasi terbaik ke " +j+" "+max +" tour ="+1/max);
+        }
 
-        //for (int i = 0; i < 100; i++) {
-        setPopulasi();
-        //showPopulasi();
-        //randompermutation();
-        RP();
-        ambilortu();
-        xover(ortu1, ortu2);
-        mutasi(anak1, anak2);
-
-         //}
     }
 }
